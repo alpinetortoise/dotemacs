@@ -1,4 +1,12 @@
 * Agenda
+#+begin_src emacs-lisp :tangle roam.el
+  (setq org-directory "~/Brain_2/")
+  (setq org-agenda-files (list "inbox.org"))
+  (setq org-capture-templates
+    '(("i" "Inbox" entry (file "inbox.org")
+      ,(concat "* TODO %?\n"
+               "/Entered on/ %U"))))
+#+end_src
 * Roam
 #+begin_src emacs-lisp :tangle roam.el
 (use-package org-roam
@@ -9,11 +17,6 @@
   (org-roam-directory "~/Brain_2")
   (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
   (org-roam-completion-everywhere t)
-  (org-roam-capture-templates
-   '(("d" "default" plain
-      "%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)))
   :bind (("C-c z l" . org-roam-buffer-toggle)
          ("C-c z f" . org-roam-node-find)
          ("C-c z i" . org-roam-node-insert):map org-mode-map
@@ -65,3 +68,28 @@
          :unnarrowed t)))
 #+END_SRC
 * Babel
+#+begin_src emacs-lisp :tangle roam.el
+(setq org-confirm-babel-evaluate nil
+      org-src-fontify-natively t
+      org-src-tab-acts-natively t)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sh         . t)
+   (js         . t)
+   (emacs-lisp . t)
+   (perl       . t)
+   (scala      . t)
+   (clojure    . t)
+   (python     . t)
+   (ruby       . t)
+   (dot        . t)
+   (css        . t)
+   (plantuml   . t)))
+
+#+end_src
+* Hugo
+#+begin_src emacs-lisp :tangle roam.el
+(use-package ox-hugo
+  :ensure t)
+#+end_src
