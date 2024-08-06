@@ -1,3 +1,6 @@
+* Agenda
+* Roam
+#+begin_src emacs-lisp :tangle roam.el
 (use-package org-roam
   :ensure t
   :init
@@ -24,29 +27,11 @@
   :config
   (require 'org-roam-dailies)
   (org-roam-db-autosync-mode))
+#+end_src
+** Capture
 
-(setq org-confirm-babel-evaluate nil
-      org-src-fontify-natively t
-      org-src-tab-acts-natively t)
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((sh         . t)
-   (js         . t)
-   (emacs-lisp . t)
-   (perl       . t)
-   (scala      . t)
-   (clojure    . t)
-   (python     . t)
-   (ruby       . t)
-   (dot        . t)
-   (css        . t)
-   (plantuml   . t)))
-
-(use-package ox-hugo
-  :ensure t)
-
-(setq org-roam-capture-templates
+#+BEGIN_SRC emacs-lisp :tangle roam.el
+  (setq org-roam-capture-templates
       '(("z" "Zettel" plain
          "%?"
          :if-new
@@ -78,3 +63,5 @@
                    #+HUGO_DRAFT: true\n")
          :immediate-finish t
          :unnarrowed t)))
+#+END_SRC
+* Babel
