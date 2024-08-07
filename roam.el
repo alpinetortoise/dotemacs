@@ -16,6 +16,9 @@
   (org-roam-directory "~/Brain_2")
   (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
   (org-roam-completion-everywhere t)
+  (org-roam-dailies-capture-templates
+   '(("d" "default" entry "* %<%I:%M %p>: %?"
+      :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
   :bind (("C-c z l" . org-roam-buffer-toggle)
          ("C-c z f" . org-roam-node-find)
          ("C-c z i" . org-roam-node-insert):map org-mode-map
@@ -83,3 +86,26 @@
 
 (use-package ox-hugo
   :ensure t)
+
+(use-package org-modern
+  :hook
+  (org-mode . global-org-modern-mode)
+  :custom
+  (org-modern-star 'replace)
+  (org-modern-replace-stars "§¤•·–")
+  (org-modern-keyword nil)
+  (org-modern-checkbox nil)
+  ;(org-modern-table nil)
+  )
+
+(use-package org-fragtog
+  :after org
+  :custom
+  (org-startup-with-latex-preview t)
+  :hook
+  (org-mode . org-fragtog-mode)
+  :custom
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2)
+   (plist-put org-format-latex-options :foreground 'auto)
+   (plist-put org-format-latex-options :background 'auto)))

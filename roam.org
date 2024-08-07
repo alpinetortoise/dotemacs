@@ -14,28 +14,32 @@
 #+end_src
 * Roam
 #+begin_src emacs-lisp :tangle roam.el
-(use-package org-roam
-  :ensure t
-  :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory "~/Brain_2")
-  (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
-  (org-roam-completion-everywhere t)
-  :bind (("C-c z l" . org-roam-buffer-toggle)
-         ("C-c z f" . org-roam-node-find)
-         ("C-c z i" . org-roam-node-insert):map org-mode-map
-         :map org-mode-map
-         ("C-M-i"    . completion-at-point)
-         :map org-roam-dailies-map
-         ("Y" . org-roam-dailies-capture-yesterday)
-         ("T" . org-roam-dailies-capture-tomorrow))
-  :bind-keymap
-  ("C-c z d" . org-roam-dailies-map)
-  :config
-  (require 'org-roam-dailies)
-  (org-roam-db-autosync-mode))
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory "~/Brain_2")
+    (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
+    (org-roam-completion-everywhere t)
+    (org-roam-dailies-capture-templates
+     '(("d" "default" entry "* %<%I:%M %p>: %?"
+        :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+    :bind (("C-c z l" . org-roam-buffer-toggle)
+           ("C-c z f" . org-roam-node-find)
+           ("C-c z i" . org-roam-node-insert):map org-mode-map
+           :map org-mode-map
+           ("C-M-i"    . completion-at-point)
+           :map org-roam-dailies-map
+           ("Y" . org-roam-dailies-capture-yesterday)
+           ("T" . org-roam-dailies-capture-tomorrow))
+    :bind-keymap
+    ("C-c z d" . org-roam-dailies-map)
+    :config
+    (require 'org-roam-dailies)
+    (org-roam-db-autosync-mode))
 #+end_src
+
 ** Capture
 
 #+BEGIN_SRC emacs-lisp :tangle roam.el
@@ -97,4 +101,31 @@
 #+begin_src emacs-lisp :tangle roam.el
 (use-package ox-hugo
   :ensure t)
+#+end_src
+* Org-modern
+#+begin_src emacs-lisp :tangle roam.el
+  (use-package org-modern
+    :hook
+    (org-mode . global-org-modern-mode)
+    :custom
+    (org-modern-star 'replace)
+    (org-modern-replace-stars "§¤•·–")
+    (org-modern-keyword nil)
+    (org-modern-checkbox nil)
+    ;(org-modern-table nil)
+    )
+#+END_SRC
+* Org-Fragtog
+#+begin_src emacs-lisp :tangle roam.el
+  (use-package org-fragtog
+    :after org
+    :custom
+    (org-startup-with-latex-preview t)
+    :hook
+    (org-mode . org-fragtog-mode)
+    :custom
+    (org-format-latex-options
+     (plist-put org-format-latex-options :scale 2)
+     (plist-put org-format-latex-options :foreground 'auto)
+     (plist-put org-format-latex-options :background 'auto)))
 #+end_src
