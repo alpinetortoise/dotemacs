@@ -1,8 +1,11 @@
 (setq org-directory "~/Brain_2/")
 (setq org-agenda-files (list "inbox.org"))
+
+(define-key global-map (kbd "C-c c") 'org-capture)
 (setq org-capture-templates
-  '(("i" "Inbox" entry (file "inbox.org")
+  `(("i" "Inbox" entry (file "inbox.org")
     ,(concat "* TODO %?\n"
+             "%i\n"
              "/Entered on/ %U"))))
 
 (use-package org-roam
