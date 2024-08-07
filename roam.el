@@ -5,7 +5,7 @@
 (setq org-capture-templates
   `(("i" "Inbox" entry (file "inbox.org")
     ,(concat "* TODO %?\n"
-             "%i\n"
+             "%a\n"
              "/Entered on/ %U"))))
 
 (use-package org-roam
