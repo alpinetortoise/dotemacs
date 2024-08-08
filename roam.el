@@ -13,7 +13,7 @@
               "   - Reps: , Sets: , Weight:\n"
               " - \n"
               "   - Reps: , Sets: , Weight:"))))
-
+			  
 (use-package org-roam
   :ensure t
   :init
