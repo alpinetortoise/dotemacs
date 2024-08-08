@@ -93,3 +93,16 @@
 (use-package ox-hugo
   :ensure t)
 #+end_src
+* Org-Modern
+#+begin_src emacs-lisp :tangle roam.el
+  (use-package org-modern
+    :hook
+    (org-mode . global-org-modern-mode)
+    :custom
+    (org-modern-star 'replace)
+    (org-modern-replace-stars "§¤•·–")
+    (org-modern-keyword nil)
+    (org-modern-checkbox nil)
+    ;(org-modern-table nil)
+    )
+#+end_src
