@@ -13,7 +13,7 @@
               "   - Reps: , Sets: , Weight:\n"
               " - \n"
               "   - Reps: , Sets: , Weight:"))))
-			  
+
 (use-package org-roam
   :ensure t
   :init
@@ -78,11 +78,10 @@
 
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((sh         . t)
+ '((shell      . t)
    (js         . t)
    (emacs-lisp . t)
    (perl       . t)
-   (scala      . t)
    (clojure    . t)
    (python     . t)
    (ruby       . t)
