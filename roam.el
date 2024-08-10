@@ -1,19 +1,6 @@
 (setq org-directory "~/Brain_2/")
 (setq org-agenda-files (list "inbox.org"))
 
-(define-key global-map (kbd "C-c c") 'org-capture)
-(setq org-capture-templates
-  `(("i" "Inbox" entry (file "inbox.org")
-    ,(concat "* TODO %?\n"
-             "%a\n"
-             "/Entered on/ %U"))
-    ("w" "Workout" entry (file "workout-log.org")
-     ,(concat "* %U\n"
-              " - %?\n"
-              "   - Reps: , Sets: , Weight:\n"
-              " - \n"
-              "   - Reps: , Sets: , Weight:"))))
-
 (use-package org-roam
   :ensure t
   :init
@@ -27,7 +14,8 @@
       :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
   :bind (("C-c z l" . org-roam-buffer-toggle)
          ("C-c z f" . org-roam-node-find)
-         ("C-c z i" . org-roam-node-insert):map org-mode-map
+         ("C-c z i" . org-roam-node-insert)
+         ("C-c z c" . org-capture)
          :map org-mode-map
          ("C-M-i"    . completion-at-point)
          :map org-roam-dailies-map
@@ -38,6 +26,19 @@
   :config
   (require 'org-roam-dailies)
   (org-roam-db-autosync-mode))
+
+(define-key global-map (kbd "C-c c") 'org-capture)
+(setq org-capture-templates
+  `(("i" "Inbox" entry (file "inbox.org")
+    ,(concat "* TODO %?\n"
+             "%a\n"
+             "/Entered on/ %U"))
+    ("w" "Workout" entry (file "workout-log.org")
+     ,(concat "* %U\n"
+              " - %?\n"
+              "   - Reps: , Sets: , Weight:\n"
+              " - \n"
+              "   - Reps: , Sets: , Weight:"))))
 
 (setq org-roam-capture-templates
     '(("z" "Zettel" plain
