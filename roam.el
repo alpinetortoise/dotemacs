@@ -16,6 +16,8 @@
          ("C-c z f" . org-roam-node-find)
          ("C-c z i" . org-roam-node-insert)
          ("C-c z c" . org-capture)
+         ("C-c z k" . org-id-get-create)
+         ("C-c z r" . org-roam-node-random)
          :map org-mode-map
          ("C-M-i"    . completion-at-point)
          :map org-roam-dailies-map
