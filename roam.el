@@ -100,7 +100,7 @@
   (org-mode . global-org-modern-mode)
   :custom
   (org-modern-star 'replace)
-  (org-modern-replace-stars "*~-")
+  ;;(org-modern-replace-stars "*~-")
   (org-modern-keyword nil)
   (org-modern-checkbox nil)
   ;(org-modern-table nil)
