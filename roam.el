@@ -11,7 +11,7 @@
   (org-roam-completion-everywhere t)
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %<%I:%M %p>: %?"
-      :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+      :if-new (file+head "%<%Y/%m/%d>.org" "#+title: %<%Y-%m-%d>\n"))))
   :bind (("C-c z l" . org-roam-buffer-toggle)
          ("C-c z f" . org-roam-node-find)
          ("C-c z i" . org-roam-node-insert)
@@ -100,7 +100,7 @@
   (org-mode . global-org-modern-mode)
   :custom
   (org-modern-star 'replace)
-  (org-modern-replace-stars "§¤•·–")
+  (org-modern-replace-stars "*~-")
   (org-modern-keyword nil)
   (org-modern-checkbox nil)
   ;(org-modern-table nil)
