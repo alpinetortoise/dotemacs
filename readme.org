@@ -1,0 +1,12 @@
+:PROPERTIES:
+:ID:       71c7e3fb-ce5c-4eba-97cc-cc4a477dcc00
+:END:
+#+title: Emacs Config
+
+* Prerequisites
+This emacs config is for use with [[https://prelude.emacsredux.com/][Emacs Prelude]] by bbatsov
+
+* Use case
+Primarily I utilise emacs for note taking and development of my own tools
+ - [[id:c5bfd0a4-d141-4b3d-9b4b-e5049a49366c][Orgmode and Roam Config]]
+ - [[id:6d9d8956-c653-4a5e-a8ab-1fe30587a89f][Init and Custom]]

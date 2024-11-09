@@ -1,0 +1,211 @@
+:PROPERTIES:
+:ID:       c5bfd0a4-d141-4b3d-9b4b-e5049a49366c
+:END:
+#+title: Orgmode and Roam Config
+#+PROPERTY:    header-args
+
+
+
+[[id:78905830-a46f-4e11-93dc-ea77cb105d17][Literate Programming]] config file for [[id:17c4db4a-bbdd-4c20-9889-2519487f0474][org-roam]]
+
+* Encryption
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+  (setq epg-gpg-program "gpg")
+  (setenv "GPG_AGENT_INFO" nil)
+  (require 'epa-file)
+  (epa-file-enable)
+  (setq org-roam-link-extensions '(".org" ".org.gpg"))
+#+END_SRC
+Org Crypt allows us to encrypt within files that otherwise are plain text
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+  (require 'org-crypt)
+  (org-crypt-use-before-save-magic)
+  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+  ;; GPG key to use for encryption
+  ;; Either the Key ID or set to nil to use symmetric encryption.
+  (setq org-crypt-key nil)
+#+end_src
+
+#+RESULTS:
+: ‘epa-file’ already enabled
+
+* Getting Things Done
+** Agenda
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+  (setq org-directory "~/Brain_2/")
+  (setq org-agenda-files (list "inbox.org"))
+#+end_src
+
+* Roam
+Org roam is an implementation of roam research in Orgmode
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el :noweb yes
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    <<ROAM_SETTINGS>>
+    :bind-keymap
+    ("C-c z d" . org-roam-dailies-map)
+    :config
+    (require 'org-roam-dailies)
+    (org-roam-db-autosync-mode))
+#+end_src
+
+We want to set it up so that our dailies and our roam database encapsulate our entire [[id:a51321f3-397b-4c10-b442-769a90d1882f][Second Brain]] which is made up of both our [[id:18c4f646-20e6-49e0-a51e-5b53045744d4][GTD]] system and our [[id:7fcd2eeb-a490-4435-83bc-e033d684bde7][Zettels]]
+#+BEGIN_SRC :tangle ~/.emacs.d/personal/roam.el :noweb-ref ROAM_SETTINGS
+    (org-roam-directory "~/Brain_2")
+    (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
+    (org-roam-completion-everywhere t)
+#+end_src
+
+* Capture
+
+** Daily key map
+
+#+begin_src emacs-lisp :tangle no :noweb-ref ROAM_SETTINGS
+  (org-roam-dailies-capture-templates
+   '(("d" "default" entry "* %<%I:%M %p>: %?"
+      :if-new (file+head "%<%Y/%m/%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+  :bind (("C-c z l" . org-roam-buffer-toggle)
+         ("C-c z f" . org-roam-node-find)
+         ("C-c z i" . org-roam-node-insert)
+         ("C-c z c" . org-capture)
+         ("C-c z k" . org-id-get-create)
+         ("C-c z r" . org-roam-node-random)
+         :map org-mode-map
+         ("C-M-i"    . completion-at-point)
+         :map org-roam-dailies-map
+         ("Y" . org-roam-dailies-capture-yesterday)
+         ("T" . org-roam-dailies-capture-tomorrow))
+#+end_src
+
+** GTD Capture
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+              (define-key global-map (kbd "C-c c") 'org-capture)
+              (setq org-capture-templates
+                `(("i" "Inbox" entry (file "inbox.org")
+                  ,(concat "* TODO %?\n"
+                           "%a\n"
+                           "/Entered on/ %U"))
+                  ("w" "Workout" entry (file "workout-log.org")
+                   ,(concat "* %U\n"
+                            " - %?\n"
+                            "   - Reps: , Sets: , Weight:\n"
+                            " - \n"
+                            "   - Reps: , Sets: , Weight:"))))
+#+end_src
+
+** Zettel capture
+
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+          (setq org-roam-capture-templates
+              '(("z" "Zettel" plain
+                 "%?"
+                 :if-new
+                 (file+head "Z.0000 Zettelkasten/${slug}.org"
+                  "#+title: ${title}
+                  ,#+created: %U
+                  ,#+last_modified: %U\n\n")
+                 :immediate-finish t
+                 :unnarrowed t)
+                ("e" "Encrypted Zetttel" plain
+                 "%?"
+                 :if-new
+                 (file+head "Z.0000 Zettelkasten/${slug}.org.gpg"
+                  "# -*- mode:org; epa-file-encrypt-to: (\"alpinetortoise@jpc.id.au\") -*-
+                  ,#+title: ${title}
+                  ,#+created: %U
+                  ,#+last_modified: %U\n\n")
+                 :immediate-finish t
+                 :unnarrowed t)
+                ("b" "Biography" plain
+                 "%?"
+                 :if-new
+                 (file+head "30-39 Personal Development/35 Biography Notes/${slug}.org"
+                  "#+title: ${title}
+                  ,#+created: %U
+                  ,#+last_modified: %U\n\n
+                  ,[[id:589b86e7-0bd7-41bd-a79b-964395ff146c][Biographies]]")
+                 :immediate-finish t
+                 :unnarrowed t)
+                ("r" "reference" plain
+                 "%?"
+                 :if-new
+                 (file+head "00-09 System/01 Reference/${title}.org"
+                            "#+title: ${title}
+                            ,#+created: %U
+                            ,#+last_modified: %U\n\n")
+                 :immediate-finish t
+                 :unnarrowed t)
+                ("b" "blog" plain             ;;                (article)
+                 "%?"
+                 :if-new
+                 (file+head "Website/${title}.org"
+                           "#+HUGO_BASE_DIR: ~/alpineTortoise
+                           ,#+HUGO_SECTION: ./posts
+                           ,#+HUGO_AUTO_SET_LASTMOD: t
+                           ,#+TITLE: ${title}
+                           ,#+DATE: %U
+                           ,#+HUGO_TAGS: article
+                           ,#+HUGO_DRAFT: true\n")
+                 :immediate-finish t
+                 :unnarrowed t)))
+#+END_SRC
+
+#+RESULTS:
+
+* Babel
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+(setq org-confirm-babel-evaluate nil
+      org-src-fontify-natively t
+      org-src-tab-acts-natively t)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell      . t)
+   (js         . t)
+   (emacs-lisp . t)
+   (perl       . t)
+   (clojure    . t)
+   (python     . t)
+   (ruby       . t)
+   (dot        . t)
+   (css        . t)
+   (plantuml   . t)))
+
+#+end_src
+* Hugo
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+(use-package ox-hugo
+  :ensure t)
+#+end_src
+* Org-modern
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+  (use-package org-modern
+    :hook
+    (org-mode . global-org-modern-mode)
+    :custom
+    (org-modern-star 'replace)
+    (org-modern-replace-stars "*~-")
+    (org-modern-keyword nil)
+    (org-modern-checkbox nil)
+    ;(org-modern-table nil)
+    )
+#+END_SRC
+
+* Org-Fragtog
+Latex visual preview
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+  (use-package org-fragtog
+    :after org
+    :custom
+    (org-startup-with-latex-preview t)
+    :hook
+    (org-mode . org-fragtog-mode)
+    :custom
+    (org-format-latex-options
+     (plist-put org-format-latex-options :scale 2)
+     (plist-put org-format-latex-options :foreground 'auto)
+     (plist-put org-format-latex-options :background 'auto)))
+#+end_src
