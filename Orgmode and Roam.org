@@ -8,6 +8,8 @@
 
 [[id:78905830-a46f-4e11-93dc-ea77cb105d17][Literate Programming]] config file for [[id:17c4db4a-bbdd-4c20-9889-2519487f0474][org-roam]]
 
+[[https://github.com/james-stoup/emacs-org-mode-tutorial][Org Mode Tutorial]]
+
 * Encryption
 #+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/personal/roam.el
   (setq epg-gpg-program "gpg")
@@ -208,6 +210,7 @@ Q2ze/oyHvCohqFM+wRbDKTEOErpg98XPEG4nT4y7Kt59r1a2c+fb8NMapO4labQQ
 #+end_src
 * Org-modern
 #+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+  (add-hook 'org-mode-hook 'org-indent-mode)
   (use-package org-modern
     :hook
     (org-mode . global-org-modern-mode)
