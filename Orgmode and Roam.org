@@ -84,6 +84,7 @@ We want to set it up so that our dailies and our roam database encapsulate our e
          ("C-c z k" . org-id-get-create)
          ("C-c z r" . org-roam-node-random)
          ("C-c z e" . add-encrypt-tag)
+         ("C-c z u" . org-roam-ui-mode)
          :map org-mode-map
          ("C-M-i"    . completion-at-point)
          :map org-roam-dailies-map
