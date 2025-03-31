@@ -239,3 +239,25 @@ Latex visual preview
      (plist-put org-format-latex-options :foreground 'auto)
      (plist-put org-format-latex-options :background 'auto)))
 #+end_src
+
+* Neovim
+#+begin_src lua :tangle ~/.config/nvim/plugins/plugins.lua
+return {
+  "chipsenkbeil/org-roam.nvim",
+  tag = "0.1.1",
+  dependencies = {
+    {
+      "nvim-orgmode/orgmode",
+      tag = "0.3.7",
+    },
+  },
+  config = function()
+    require("org-roam").setup({
+      directory = "~/Desktop/Apps/Documents/Brain_2",
+      -- optional
+      org_files = {"~/Desktop/Apps/Documents/Brain_2"}
+    })
+  end
+}
+
+#+end_src
