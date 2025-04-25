@@ -3,82 +3,175 @@
 :END:
 #+title: Orgmode and Roam Config
 #+PROPERTY:    header-args
-
-
-
 [[id:78905830-a46f-4e11-93dc-ea77cb105d17][Literate Programming]] config file for [[id:17c4db4a-bbdd-4c20-9889-2519487f0474][org-roam]]. To perform a tangle the encrypted sections will need to be decrypted.
 
 [[https://github.com/james-stoup/emacs-org-mode-tutorial][Org Mode Tutorial]]
 
-* Encryption
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+* roam.el
+#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el :noweb yes
+  ;; Org-mode basic setup
+  <<org/files>>
+
+  ;; Org-Crypt
+  <<crypt>>
+
+  ;; My functions
+  <<functions>>
+
+  ;; Org-Roam
+  <<roam>>
+
+  ;; Org-babel
+  <<babel>>
+
+  ;; org-fragtog
+  <<fragtog>>
+
+  ;; org-modern
+  <<modern>>
+#+End_src
+* Org mode
+** Files
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref org/files
+  (setq org-roam-link-extensions '(".org" ".org.gpg"))
+  (setq org-directory "~/Brain_2/")
+  (setq org-agenda-files (list "inbox.org"))
+#+END_SRC
+** Helper functions
+#+BEGIN_SRC emacs-lisp :tangle no :noweb yes :noweb-ref functions
+  <<fun/dir>>
+  <<fun/dir-choose>>
+  <<fun/cyber-init>>
+  <<crypt/add-encrypt-tag>>
+#+END_SRC
+*** jpc/org-roam-directories
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref fun/dir
+  (defun jpc/org-roam-directories ()
+  (let ((files (mapcar (lambda (f) (file-relative-name f org-roam-directory))
+                       (directory-files-recursively org-roam-directory "\\.org$"))))
+    (mapcar (lambda (f) (file-name-directory f))
+            files)))
+#+END_SRC
+*** jpc/ask-folder
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref fun/dir-choose
+  (defun jpc/ask-folder (ARG)
+    (completing-read "Choose org file :target : " (jpc/org-roam-directories)))
+#+END_SRC
+*** jpc/cyber-init
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref fun/cyber-init
+  (defun jpc/cyber-init ()
+    (let* ((folder (expand-file-name (jpc/ask-folder nil) "~/Brain_2/"))
+           (templates (expand-file-name "~/Brain_2/.templates/cyber-lab"))
+           (investigation (expand-file-name "investigation.org" templates)))
+
+      (unless (file-directory-p folder)
+        (make-directory folder t))
+      (dolist (file (directory-files templates t "^[^.].*\\.org$"))
+        (copy-file file (expand-file-name (file-name-nondirectory  file) folder) t))
+      folder))
+#+END_SRC
+* Org-Crypt
+#+BEGIN_SRC emacs-lisp :tangle no :noweb yes :noweb-ref crypt/gpg
   (setq epg-gpg-program "gpg")
   (setenv "GPG_AGENT_INFO" nil)
   (require 'epa-file)
   (epa-file-enable)
-  (setq org-roam-link-extensions '(".org" ".org.gpg"))
 #+END_SRC
-Org Crypt allows us to encrypt within files that otherwise are plain text
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+Org Crypt allows us to encrypt within files that otherwise are in plain text
+#+BEGIN_SRC  emacs-lisp :tangle no :noweb yes :noweb-ref crypt
+  <<crypt/gpg>>
   (require 'org-crypt)
   (org-crypt-use-before-save-magic)
   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
   ;; GPG key to use for encryption
   ;; Either the Key ID or set to nil to use symmetric encryption.
   (setq org-crypt-key "Joshua Chubb")
-#+end_src
-
-* Getting Things Done
-** Agenda
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
-  (setq org-directory "~/Brain_2/")
-  (setq org-agenda-files (list "inbox.org"))
-#+end_src
-
-** add-encrypt-tag :crypt:
+#+END_SRC
+** jpc/encrypt-tag                                                     :crypt:
 -----BEGIN PGP MESSAGE-----
 
-jA0ECQMCxSCFcvrPeDj/0sBEAXMyYi1nYxsuO3C2VrHMcMP/O1L7kmGMc+OcR9fT
-BGpDIh5dkYCPe5nLcBDj6+1F+oMxHQm/yZBwNnpDKWwh9sKuWvxvWBSWg5BEMB5V
-6ZuxdCS09UZfzYrYHSD6tCd2L35y5gFFKQCwNbIPxJj5jNRPCeDFAD/HYX0BIJ0W
-NNTiV7zSqUcyPQauj7mnWCALWwxbqIvAF1HEvhPCrXnZ/NZBHdBr3+iNlV1zsuVt
-ymalHhYRwj/3SGiCdwDA3Uv0cUSxn+qdRdCYesw4pVi4jiPBRLrqRcJmyPdvCYJX
-00NKUjR6k9qhbtDZk2FXsqocLPyh+rpOZuZtsPMkmRD/h4uayEU=
-=3Yyi
+hQGMAxV49JAapn/VAQv+Pm0q2ySBhDg4+KWsmKrDbtryTk9TdJs2zZI0MHJAZpq0
+gtIhIDQnjq3bLD+/9MyW4W6mbWr2kvRiSnOxZlU+y4ICBi3u/5NB15bZM3U9dvlI
+wTOEzyDS+LUoxAOfN11rsTZPEyzCrooqFNyfBrN9RLP3SHSQ0k0D4ft/5a/cApiy
+feAWwyjwg4bYOxuX9C9i48HTbUKTYgMjtLjNB4MP+kGGR9AdUU/2VynX1nsopFEp
+93QK9JR3SzNa0wMFz1YD+H6fldUCVzw4f8OhtZzze957N8tz0bFTAewuGd303EoT
+G4LY36e2Bxh/ANbOIJXu0OZe/ioBw6XI/kkc5oEqFyAff3A1cWg78yMxFS89VNrm
+B1ouEFPPUthJBTZN096o4/f57yt45Jafa2e/nWxJto5YNecSF6mLvmJ/CmByP4HK
+YYAfmGPaqEdNvS7GmPAllBbA3BOyMKtvh7Nn5/KxzhOskLUXI6NrrR3zS5qPKygK
+LYuoFAHx1PDMT00JiLIy0sB8ARhpmgp9WaWGgdcuYo/wCOREsdyl205ExBryYPcp
+MaebeS0nFcJssCw8Sws6npH4w8WmDHY54fbiWJZQeHM3jJWVoV6LZYvFQo6AnjpU
+6vnHqqYOUO0Dc6zSQaI31CvK2ghHK7JLujTz5MZjZMlxw+Mr/Z0TIwhTTWpiu3sY
+7crpvd96kinIlTiKsTf1dvk01t9SB5F83cB9ogEwjOpEbZBL4TstKEKmq3ccE7pz
+2Ss5YTPBSMNlvG3hDQkhy6XdkJCkFnDzIgKnWdaNkC7TP0mqweA2dagQRkl36aDK
+0BEaiya/NWlEEEUsa+zlQlUEpBWGXSNQT1stDwK5Umokz75qfM+b0LcfY/Sn6TkZ
+xAxfWXLRbCugy7EIlsjJUVKL2UthQOishLb1gscoKXnne1WTH9HuNxcWJh0eHQ==
+=3Scg
 -----END PGP MESSAGE-----
+** Encrypted Zettel :crypt:
+-----BEGIN PGP MESSAGE-----
 
+hQGMAxV49JAapn/VAQwAgSBoY84aMpNQXjMGYhIVA5Jys8W0raw1WbqeppeD92SH
+/ugEv1C2EXj1uxTWPvTykvUddxkQnn+fvsoWvzfXQaGtgvFPowVbOrcPAoy9qR9R
+OTDuwctp8bEEbqEmkIkiV3voYtCIoDU956LNeOBYqrwt4a8Yv1zt6Vp7Mm7ii/+0
+RGOoHW50Rt5RUr6z3lOEI/W/IobqYZ62nj8oXgT8maNUNfXsvaKs8b0IGtaJ8BTg
+SdHFLl10ohqO+hgaTOTH6qcpBShMmPQrOt7zkeOATTWxCk5s+6rmxjnTXIXvS40q
+XXbI0GIrU1oqMbYZaxymDr3q546a8UL4tFXoCwPvLVI8E6a/xOedFft2imLAIa7P
+j293T4xPUW5RV/UZHmwxEKVx9inYKfSn4brbLOOTytApIhDAS+EUqEo2lRFh6oH9
+xmhlnB7P000EigSkEP+Ub5uVuXocuLlrW2E57hHCkks4++7eruWy5GT/OFPvIds3
+8fOLZtXQMIjollhesQ1e0sC3AbpKmyYDkeUiMQfacX2oxz4lt9ACxL3km0sL5IrJ
+Fbexb3Y3V3WZ0WJ3gVhMZObFcdZmP+awJ0ghstLhCqvksYYxFA9pbY2PVrwlRcbE
+5o1N8YFmXnp5GtGwtWpPsoN8EHUVEvT8ZWzygxo0E1v+pXURBOuztUll7dz84U1I
+BN2aouuIkv+S3FnuOzytw7Sn+vIjh/fz8WPo1NHtGodk8wdeLmgLXnbWisgkNPRY
+Kj5LU/RgZSxBFdiXHuFDoX7P6c5BhBOhKj3sUTzAiSn+AymYbIJAeWg+3TFQ004O
+wekOo5JtLgr6+GZ2ccVERa9YAjlgTIWKSfEaGrmDHRJwvjKArLIXY5GP62WnE+R/
+ukeNgV9ArpABhiAG/xSvTDIVjMUw4C1XoEmZAGjAByA5MhMtnTj0Fa9wGLK67y0/
+oR17x5ASikKd3DYPH7yTqcyD83iOhUM4aacbWd6hfb6cBf6Em2AMNGVj5bT/OLZt
+H9Np6flKJp4P
+=lwX0
+-----END PGP MESSAGE-----
 * Roam
-Org roam is an implementation of roam research in Orgmode
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el :noweb yes
+#+BEGIN_SRC emacs-lisp :tangle no :noweb yes :noweb-ref roam
   ;; ROAM SETTINGS
   (use-package org-roam
     :ensure t
     :init
     (setq org-roam-v2-ack t)
     :custom
-    <<ROAM_SETTINGS>>
-    :bind-keymap
-    ("C-c z d" . org-roam-dailies-map)
-    :config
-    (require 'org-roam-dailies)
-    (org-roam-db-autosync-mode))
-#+end_src
-
-We want to set it up so that our dailies and our roam database encapsulate our entire [[id:a51321f3-397b-4c10-b442-769a90d1882f][Second Brain]] which is made up of both our [[id:18c4f646-20e6-49e0-a51e-5b53045744d4][GTD]] system and our [[id:7fcd2eeb-a490-4435-83bc-e033d684bde7][Zettels]]
-#+BEGIN_SRC :tangle ~/.emacs.d/personal/roam.el :noweb-ref ROAM_SETTINGS
     (org-roam-directory "~/Brain_2")
-    (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
     (org-roam-completion-everywhere t)
-#+end_src
+    <<roam/dailies>>
+    <<roam/bindings>>
+    :config
+    <<roam/dailies/req>>
+    (org-roam-db-autosync-mode)
+    )
+  <<roam/capture>>
+#+END_SRC
+** Dailies
+We need to add the dailies into our org-roam configuration, to do this we will add the following line to our :config section of our org-roam use-package call
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/dailies/req
+    (require 'org-roam-dailies)
+#+END_SRC
 
-* Capture
-
-** Daily key map
-
-#+begin_src emacs-lisp :tangle no :noweb-ref ROAM_SETTINGS
-  (org-roam-dailies-capture-templates
-   '(("d" "default" entry "* %<%I:%M %p>: %?"
-      :if-new (file+head "%<%Y/%m/%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/dailies
+    (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
+    (org-roam-dailies-capture-templates
+     '(("d" "Today" entry "* %<%I:%M %p>: %?"
+        :if-new (file+head "%<%Y/%m/%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+#+END_SRC
+*** Keymap
+We want to define and call our roam-dailies map to be able to get certain local dailies
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/dailies/map
+  :map org-roam-dailies-map
+  ("Y" . org-roam-dailies-capture-yesterday)
+  ("T" . org-roam-dailies-capture-tomorrow)
+#+END_SRC
+**** bind
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/dailies/map/bind
+  ("C-c z d" . org-roam-dailies-map)
+#+END_SRC
+** Bindings
+#+BEGIN_SRC emacs-lisp :tangle no :noweb yes :noweb-ref roam/bindings
   :bind (("C-c z l" . org-roam-buffer-toggle)
          ("C-c z f" . org-roam-node-find)
          ("C-c z i" . org-roam-node-insert)
@@ -86,178 +179,120 @@ We want to set it up so that our dailies and our roam database encapsulate our e
          ("C-c z k" . org-id-get-create)
          ("C-c z r" . org-roam-node-random)
          ("C-c z e" . add-encrypt-tag)
+         ("C-c z w" . org-decrypt-entry)
          ("C-c z u" . org-roam-ui-mode)
          :map org-mode-map
          ("C-M-i"    . completion-at-point)
-         :map org-roam-dailies-map
-         ("Y" . org-roam-dailies-capture-yesterday)
-         ("T" . org-roam-dailies-capture-tomorrow))
-#+end_src
-
-** GTD Capture
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
-              (define-key global-map (kbd "C-c c") 'org-capture)
-              (setq org-capture-templates
-                `(("i" "Inbox" entry (file "inbox.org")
-                  ,(concat "* TODO %?\n"
-                           "%a\n"
-                           "/Entered on/ %U"))
-                  ("w" "Workout" entry (file "workout-log.org")
-                   ,(concat "* %U\n"
-                            " - %?\n"
-                            "   - Reps: , Sets: , Weight:\n"
-                            " - \n"
-                            "   - Reps: , Sets: , Weight:"))))
-#+end_src
-
-** Zettel capture
-
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+         <<roam/dailies/map>>
+         )
+  :bind-keymap
+  <<roam/dailies/map/bind>>
+#+END_SRC
+** Capture
+#+BEGIN_SRC emacs-lisp :tangle no :noweb yes :noweb-ref roam/capture
   (setq org-roam-capture-templates
-      '(("z" "Zettel" plain
-         "%?"
-         :if-new
-         (file+head "Z.0000 Zettelkasten/${slug}.org"
-          "#+title: ${title}
-          ,#+created: %U
-          ,#+last_modified: %U\n\n")
-         :immediate-finish t
-         :unnarrowed t)
-        #+END_SRC
-
-*** encrypted zettels :crypt:
------BEGIN PGP MESSAGE-----
-
-hQGMAxV49JAapn/VAQwAsssCwjmslFhsjiunMK7vL4gm73ngryVWtQPojzKDEv3s
-S2fqjAdldOFYn/Sv6ajum5w+vxxWja9hAWJqbNw5R1WzKB4fihbAI7+oFRz77rFs
-npW11MYgYfC9Xyri6eulZd4rcXMsRlCXqYOIf8SUfNx9URVv+Mpi+6JUFSqi5JFi
-kSIjHd7Q3EXX4SztpnyGmD9+5QC76r7kKV0IgU8Oe/YP2kpqc+23Jn8xOjOriMlm
-7Z+UJPbgW5DWsR6GcUM+kmKlTzPdIYMBZdqlqg5PYRijsy5UuHu6Pu4Cdnt8c/e+
-bK2HdJwrWWZ+mOhKHNqJgqUSN+do1aKFfPx3GopKFQN4wrId246GgA5GsCQE+O/0
-7BGRlBx9dGua3LBeW2L/HEeX7eQQ8Tj8+mW5pMCKfzhL/SkW33gLBujZWhQ1eUH4
-vfCHbg4p35HLRb4NaRjNyDJRbZ+9ROjE2v4qWOuzcRwrf9kfp/2FdKLFiboTQT7K
-NNYdB8y3MD5dsIckNEEM0sCFAcGz0riOAwyOppCC7sSwNxMsoTSaX208DoRTwoZr
-P319XJJ8wtFkcMCPslGGrqJBmt8F12o8O3ep2RQVr8uqDiL72qUxHzajYH4GOzO+
-cObE/srD169VB8l/qQgs3OoW2g4WI6v75FqH/UksyLBmBAKCq3m5zQeQCXkszH6B
-UeA8eZ+B7azlKd+/6rALVDBO+N3RoaVJN9wx2j/jOiCIctha00OFhQPROr5jytru
-YCWjcWEYyDL+EkiCTfy8fiGUCbpeWNGDE167UCru3fMjEYtd7N9jfeet/BOkWbgZ
-Pxk5OHpUvhSPf1RqhGVYv2qpJrqBmNNVkJOEWaPQS+K2ijFvblwd+U8H64Z+ZFPE
-Q2ze/oyHvCohqFM+wRbDKTEOErpg98XPEG4nT4y7Kt59r1a2c+fb8NMapO4labQQ
-/jH6Tt0/Ug==
-=RTtc
------END PGP MESSAGE-----
-*** further zettels
-#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+        '(
+          <<roam/capture/zettel>>
+          <<crypt/zettel>>
+          <<roam/capture/cyber>>
+          <<roam/capture/bio>>
+          <<roam/capture/ref>>
+          ))
+#+END_SRC
+*** Zettel
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/zettel
+  ("z" "Zettel" plain
+   "%?"
+   :if-new
+   (file+head "Z.0000 Zettelkasten/${slug}.org"
+              "#+title: ${title}
+        ,#+created: %U
+        ,#+last_modified: %U\n\n")
+   :immediate-finish t
+   :unnarrowed t)
+#+END_SRC
+*** Cyber Investigation
+This was very hacky, I think this simpler version *should* work, however what chatGPT generated is preserved in the second code block
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/cyber
+  ("i" "Cyber Investigation" plain "%?%[~/Brain_2/.templates/investigation.org]"
+   :target (file+head (expand-file-name index.org jpc/cyberinit) "#+title:  ${title}\n")
+   :immediate-finish t
+   :unnarrowed t)
+#+END_src
+**** chatGPT's version
+#+BEGIN_SRC emacs-lisp :tangle no
+  ("i" "Cyber Investigation" plain "%?%[~/Brain_2/.templates/investigation.org]"
+   :target (file+head (lambda () (let ((path (expand-file-name (concat (jpc/cyber-init) "/index.org"))))
+                                   path)) "#+title:  ${title}\n")
+   :immediate-finish t
+   :unnarrowed t)
+#+END_SRC
+*** Biography
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/bio
   ("b" "Biography" plain
    "%?"
    :if-new
-   (file+head "30-39 Personal Development/35 Biography Notes/${slug}.org"
-    "#+title: ${title}
-    ,#+created: %U
-    ,#+last_modified: %U\n\n
-    ,[[id:589b86e7-0bd7-41bd-a79b-964395ff146c][Biographies]]")
+   (file+head "30-49 Personal Development/34 Literature notes/34.00 Biography Notes${slug}.org"
+              "#+title: ${title}
+    [[id:589b86e7-0bd7-41bd-a79b-964395ff146c][Biographies]]")
    :immediate-finish t
    :unnarrowed t)
+#+END_SRC
+*** Reference
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/ref
   ("r" "reference" plain
    "%?"
    :if-new
    (file+head "00-09 System/01 Reference/${title}.org"
               "#+title: ${title}
-              ,#+created: %U
-              ,#+last_modified: %U\n\n")
+            ,#+created: %U
+            ,#+last_modified: %U\n\n")
    :immediate-finish t
    :unnarrowed t)
-  ("b" "blog" plain             ;;                (article)
-   "%?"
-   :if-new
-   (file+head "Website/${title}.org"
-             "#+HUGO_BASE_DIR: ~/alpineTortoise
-             ,#+HUGO_SECTION: ./posts
-             ,#+HUGO_AUTO_SET_LASTMOD: t
-             ,#+TITLE: ${title}
-             ,#+DATE: %U
-             ,#+HUGO_TAGS: article
-             ,#+HUGO_DRAFT: true\n")
-   :immediate-finish t
-   :unnarrowed t)))
 #+END_SRC
-
-
-
 * Babel
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
-(setq org-confirm-babel-evaluate nil
-      org-src-fontify-natively t
-      org-src-tab-acts-natively t)
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref babel
+  (setq org-confirm-babel-evaluate nil
+        org-src-fontify-natively t
+        org-src-tab-acts-natively t)
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((shell      . t)
-   (js         . t)
-   (emacs-lisp . t)
-   (perl       . t)
-   (clojure    . t)
-   (python     . t)
-   (ruby       . t)
-   (dot        . t)
-   (css        . t)
-   (plantuml   . t)))
-
-#+end_src
-* Hugo
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
-(use-package ox-hugo
-  :ensure t)
-#+end_src
-* Org-modern
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
-  (add-hook 'org-mode-hook 'org-indent-mode)
-  (use-package org-modern
-    :hook
-    (org-mode . global-org-modern-mode)
-    :custom
-    (org-modern-star 'replace)
-    ;(org-modern-replace-stars "*~-")
-    (org-modern-keyword nil)
-    (org-modern-checkbox nil)
-    ;(org-modern-table nil)
-    )
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((shell      . t)
+     (js         . t)
+     (emacs-lisp . t)
+     (perl       . t)
+     (clojure    . t)
+     (python     . t)
+     (ruby       . t)
+     (dot        . t)
+     (css        . t)
+     (plantuml   . t)))
 #+END_SRC
-
-* Org-Fragtog
-Latex visual preview
-#+begin_src emacs-lisp :tangle ~/.emacs.d/personal/roam.el
+* Modern
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref modern
+  (use-package org-modern
+  :hook
+  (org-mode . global-org-modern-mode)
+  :custom
+  (org-modern-star 'replace)
+  ;(org-modern-replace-stars "*~-")
+  (org-modern-keyword nil)
+  (org-modern-checkbox nil)
+  ;(org-modern-table nil)
+  )
+#+END_SRC
+* Fragtog
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref fragtog
   (use-package org-fragtog
-    :after org
-    :custom
-    (org-startup-with-latex-preview t)
-    :hook
-    (org-mode . org-fragtog-mode)
-    :custom
-    (org-format-latex-options
-     (plist-put org-format-latex-options :scale 2)
-     (plist-put org-format-latex-options :foreground 'auto)
-     (plist-put org-format-latex-options :background 'auto)))
-#+end_src
-
-* Neovim
-#+begin_src lua :tangle ~/.config/nvim/plugins/plugins.lua
-return {
-  "chipsenkbeil/org-roam.nvim",
-  tag = "0.1.1",
-  dependencies = {
-    {
-      "nvim-orgmode/orgmode",
-      tag = "0.3.7",
-    },
-  },
-  config = function()
-    require("org-roam").setup({
-      directory = "~/Desktop/Apps/Documents/Brain_2",
-      -- optional
-      org_files = {"~/Desktop/Apps/Documents/Brain_2"}
-    })
-  end
-}
-
-#+end_src
+  :after org
+  :custom
+  (org-startup-with-latex-preview t)
+  :hook
+  (org-mode . org-fragtog-mode)
+  :custom
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2)
+   (plist-put org-format-latex-options :foreground 'auto)
+   (plist-put org-format-latex-options :background 'auto)))
+#+END_SRC
