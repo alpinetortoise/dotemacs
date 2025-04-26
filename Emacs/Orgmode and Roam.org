@@ -42,7 +42,7 @@
   <<fun/dir>>
   <<fun/dir-choose>>
   <<fun/cyber-init>>
-  <<crypt/add-encrypt-tag>>
+  <<crypt/add-tag>>
 #+END_SRC
 *** jpc/org-roam-directories
 #+BEGIN_SRC emacs-lisp :tangle no :noweb-ref fun/dir
@@ -87,7 +87,7 @@ Org Crypt allows us to encrypt within files that otherwise are in plain text
   ;; Either the Key ID or set to nil to use symmetric encryption.
   (setq org-crypt-key "Joshua Chubb")
 #+END_SRC
-** jpc/encrypt-tag                                                     :crypt:
+** jpc/encrypt-tag :crypt:
 -----BEGIN PGP MESSAGE-----
 
 hQGMAxV49JAapn/VAQv+Pm0q2ySBhDg4+KWsmKrDbtryTk9TdJs2zZI0MHJAZpq0
@@ -154,7 +154,7 @@ We need to add the dailies into our org-roam configuration, to do this we will a
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/dailies
-    (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
+    (org-roam-dailies-directory "~/Brain_2/02 Journal/")
     (org-roam-dailies-capture-templates
      '(("d" "Today" entry "* %<%I:%M %p>: %?"
         :if-new (file+head "%<%Y/%m/%d>.org" "#+title: %<%Y-%m-%d>\n"))))
@@ -193,6 +193,7 @@ We want to define and call our roam-dailies map to be able to get certain local 
   (setq org-roam-capture-templates
         '(
           <<roam/capture/zettel>>
+          <<roam/capture/filed>>
           <<crypt/zettel>>
           <<roam/capture/cyber>>
           <<roam/capture/bio>>
@@ -204,13 +205,35 @@ We want to define and call our roam-dailies map to be able to get certain local 
   ("z" "Zettel" plain
    "%?"
    :if-new
-   (file+head "Z.0000 Zettelkasten/${slug}.org"
+   (file+head "Z Inbox/${slug}.org"
               "#+title: ${title}
         ,#+created: %U
         ,#+last_modified: %U\n\n")
    :immediate-finish t
    :unnarrowed t)
 #+END_SRC
+*** Filed Note
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/filed
+  ("f" "filed" plain
+   "%?"
+   :if-new
+   (file+head (expand-file-name "${slug}.org" jpc/ask-folder)
+              "#+title: ${title}")
+   :immediate-finish t
+   :unnarrowed t)
+#+END_SRC
+
+*** Literature Note
+#+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/litnote
+  ("l" "literature" plain
+   "%?"
+   :if-new
+   (file+head "04 Literature/${slug}.org"
+              "#+title: ${title}")
+   :immediate-finish t
+   :unnarrowed t)
+#+END_SRC
+
 *** Cyber Investigation
 This was very hacky, I think this simpler version *should* work, however what chatGPT generated is preserved in the second code block
 #+BEGIN_SRC emacs-lisp :tangle no :noweb-ref roam/capture/cyber
@@ -232,7 +255,7 @@ This was very hacky, I think this simpler version *should* work, however what ch
   ("b" "Biography" plain
    "%?"
    :if-new
-   (file+head "30-49 Personal Development/34 Literature notes/34.00 Biography Notes${slug}.org"
+   (file+head "04 Literature/04.01 Biographies/${slug}.org"
               "#+title: ${title}
     [[id:589b86e7-0bd7-41bd-a79b-964395ff146c][Biographies]]")
    :immediate-finish t
@@ -243,7 +266,7 @@ This was very hacky, I think this simpler version *should* work, however what ch
   ("r" "reference" plain
    "%?"
    :if-new
-   (file+head "00-09 System/01 Reference/${title}.org"
+   (file+head "00 System/01 Reference/${slug}.org"
               "#+title: ${title}
             ,#+created: %U
             ,#+last_modified: %U\n\n")
