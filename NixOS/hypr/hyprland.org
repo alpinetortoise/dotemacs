@@ -1,0 +1,5 @@
+:PROPERTIES:
+:ID:       2f0b6dc7-a308-4406-90ae-8741563a41ab
+:END:
+#+title: Hyprland conf
+This currently is found within [[id:dc43850e-da87-4609-a262-aec91e34a7c8][Home-manager (home.nix)]]

@@ -1,0 +1,8 @@
+:PROPERTIES:
+:ID:       2dffc8de-3d68-4492-a130-15f5f06333a7
+:END:
+#+title: NixOS configuration.nix
+[[id:ae9fc4ba-b78c-4212-9314-983bf2552b0f][nix (language)]] is a declarative language and package manager, and is the basis of [[id:b6994f56-9610-4c6c-89af-847ff7679180][NixOS]] and [[id:dc43850e-da87-4609-a262-aec91e34a7c8][Home-manager (home.nix)]]
+* configuration.nix
+* hardware.nix
+* flake.nix

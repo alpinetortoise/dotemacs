@@ -1,0 +1,682 @@
+:PROPERTIES:
+:ID:       dc43850e-da87-4609-a262-aec91e34a7c8
+:END:
+#+title: Home-manager (home.nix)
+* home.nix
+#+begin_src nix :tangle ~/.config/home-manager/home.nix :noweb yes
+  { config, pkgs, ... }:
+  <<dev/comp/tex>>
+  {
+    <<home-manager>>
+    <<pkgs>>
+    <<dotfiles>>
+    <<hypr/conf>>
+  }
+#+END_SRC
+** home-manager initialisation
+#+BEGIN_SRC nix :tangle no :noweb-ref home-manager
+  home.username = "jpc";
+  home.homeDirectory = "/home/jpc";
+  home.stateVersion = "25.05"; # Please read the comment before changing.
+  programs.home-manager.enable = true;
+#+END_SRC
+* Programs
+#+BEGIN_SRC nix :tangle no :noweb yes :noweb-ref pkgs
+  home.packages = with pkgs; [
+    <<dev/comp>>
+    <<tty>>
+    <<comms>>
+    <<hypr/progs>>
+  ];
+  <<editors>>
+  <<dev/git>>
+#+END_SRC
+** Editors
+#+begin_src nix :tangle no :noweb-ref editors
+  programs.emacs.enable = true;
+  programs.neovim.enable = true;
+#+end_src
+** Development
+#+begin_src nix :tangle no :noweb-ref dev/git
+  programs.git = {
+    enable = true;
+    userEmail = "alpinetortoise@jpc.id.au";
+    userName = "Joshua";
+  };
+#+end_src
+*** Compilers
+#+BEGIN_SRC nix :tangle no :noweb-ref dev/comp
+  # Development
+  gcc
+  cargo
+  python3Full
+  nodejs
+  unzip
+  tex
+
+#+END_SRC
+**** Tex
+#+BEGIN_SRC nix :tangle no :noweb-ref dev/comp/tex
+  let
+    tex = (pkgs.texlive.combine {
+      inherit (pkgs.texlive) scheme-small
+        dvisvgm dvipng # for preview and export as html
+        wrapfig amsmath ulem hyperref capt-of etoolbox;
+        #(setq org-latex-compiler "lualatex")
+        #(setq org-preview-latex-default-process 'dvisvgm)
+    });
+  in
+#+END_SRC
+** Terminal life
+#+BEGIN_SRC nix :tangle no :noweb-ref tty
+  # Terminal life
+  w3m
+  nnn
+  mutt
+  neofetch
+  foot
+  zsh
+  eza
+  silver-searcher
+  pass
+#+END_SRC
+** Communication
+#+BEGIN_SRC nix :tangle no :noweb-ref comms
+  # Comms
+  signal-desktop
+  claws-mail
+#+END_SRC
+* dotfiles
+#+BEGIN_SRC nix :tangle no :noweb-ref dotfiles :noweb yes
+  home.file = {
+    <<zshrc>>
+    <<mutt>>
+  };
+#+END_SRC
+** .zshrc
+#+BEGIN_SRC nix :tangle no :noweb-ref zshrc :noweb yes
+    ".zshrc" = {
+      text = ''
+      export ZSH="$HOME/.oh-my-zsh"
+
+      ZSH_THEME="xiong-chiamiov-plus"
+
+      plugins=(
+          git
+          zsh-autosuggestions
+          zsh-syntax-highlighting
+      )
+
+      source $ZSH/oh-my-zsh.sh
+
+      zstyle ':completion:*' file-sort access
+      zstyle :compinstall filename '/home/jpc/.zshrc'
+
+      autoload -Uz compinit
+      compinit
+
+      HISTFILE=~/.bash_history
+      HISTSIZE=2000
+      SAVEHIST=100000
+      unsetopt beep
+      bindkey -e
+
+      alias ls='eza -a --icons'
+      alias ll='eza -al --icons'
+      alias lt='eza -a --tree --level=1 --icons'
+      '';
+    };
+#+END_SRC
+** foot
+*** TODO Add in foot config
+** mutt
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt :noweb yes
+  <<mutt/rc>>
+  <<mutt/cfg/gen>>
+  <<mutt/cfg/aliases>>
+  <<mutt/cfg/hooks>>
+  <<mutt/cfg/gpg>>
+  <<mutt/cfg/maillists>>
+  <<mutt/cfg/mailboxes>>
+  <<mutt/cfg/headers>>
+  <<mutt/cfg/sidebar>>
+  <<mutt/cfg/keybindings>>
+  <<mutt/cfg/macros>>
+  <<mutt/cfg/acct/at>>
+  <<mutt/cfg/acct/jc>>
+#+END_SRC
+*** muttrc
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/rc
+  ".mutt/muttrc" = {
+    text = ''
+    ## config for mutt >= 1.13.5
+
+    source ~/.mutt/cfg/general
+
+    source ~/.mutt/cfg/hooks
+
+    # source ~/.mutt/cfg/gpg
+
+    # source ~/.mutt/cfg/maillists
+
+    source ~/.mutt/cfg/mailboxes
+
+    source ~/.mutt/cfg/headers
+
+    source ~/.mutt/cfg/sidebar
+
+    source ~/.mutt/cfg/keybindings
+
+    source ~/.mutt/cfg/macros
+    '';
+  };
+#+END_SRC
+*** cfg/general
+#+begin_SRC nix :tangle no :noweb-ref mutt/cfg/gen
+  ".mutt/cfg/general" = {
+    text = ''
+    set realname = "Your Name"
+    # list of my mail address
+    alternates "^(josh.chubb@jpc.id.au|alpinetortoise@jpc.id.au)$"
+
+    # show mutt version at the start
+    push <show-version>
+
+    set charset = "utf-8"
+    set send_charset = "utf-8"
+
+    set header_cache = "~/.mutt/cache/headers"
+    set message_cachedir = "~/.mutt/cache/bodies"
+    set certificate_file = "~/.mutt/certificates"
+
+    # this prevents Mutt from endlessly asking when you quit:
+    #     "Move read messages to ~/mbox? ([no]/yes):"
+    set move = no
+
+    # If you start mutt and several new messages are in your inbox and you close
+    # mutt before you have read them, then those messages will get flagged as old
+    # (by default). The behavior can be controlled via the mark_old configuration variable.
+    set mark_old = no
+
+    set include = yes
+    set quit = yes
+    set arrow_cursor = no
+    set delete = yes
+    set user_agent = yes
+
+    set abort_nosubject = yes
+
+    # check for unread, flagged, and total message counts
+    set mail_check_stats = yes
+    # 60 secs
+    set mail_check_stats_interval = 60
+
+    set sort = threads
+    set sort_aux = last-date-received
+
+    # personal variables, starts with my_
+    # to display variable value on mutt:
+    # type : set ?variable_name
+    set my_test = "hihi"
+
+    set hdr_format = "%4C %Z %{%b %d} %-15.15n (%4l) %s"
+
+    set ssl_starttls = yes
+    set ssl_force_tls = yes
+
+    ## IMAP connections
+    # Allow Mutt to open a new IMAP connection automatically.
+    unset imap_passive
+    # Keep the IMAP connection alive by polling intermittently (time in seconds).
+    set imap_keepalive = 60
+    # How often to check for new mail (time in seconds).
+    set mail_check = 120
+    # Do not automatically poll subscribed mailboxes for new mail
+    set imap_check_subscribed = no
+
+    ## spell
+    set my_ptbr_spell = "/usr/bin/aspell -c --mode=email --lang=pt_BR"
+    set my_enus_spell = "/usr/bin/aspell -c --mode=email --lang=en_US"
+    # default spell
+    set ispell = $my_ptbr_spell
+
+    ## bookmarks in mutt
+    set alias_file = ~/.mutt/cfg/aliases
+    set sort_alias = alias
+    set reverse_alias = yes
+    source ~/.mutt/cfg/aliases
+
+    ## view special formats
+    set mailcap_path = ~/.mutt/mailcap
+    # order to display in multitype mail
+    alternative_order text/plain text/enriched text/html
+    auto_view text/html
+    auto_view application/pdf
+    '';
+  };
+#+END_SRC
+*** cfg/aliases
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/aliases
+  ".mutt/cfg/aliases" = {
+    text = ''
+           #1#
+           #2# ~/.mutt/aliases
+           #3#
+           #4# Command alias :
+           #5# Syntax: alias <name> <address_list>
+           #6# <address_list> := <address>{,<address>}
+           #7# Attention: !!! No mutt comments in the alias lines !!!
+           #8#
+           alias Joshua Chubb <josh.chubb@jpc.id.au>
+           alias alpinetortoise <alpinetortoise@jpc.id.au>
+           '';
+    };
+#+END_SRC
+*** cfg/hooks
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/hooks
+  ".mutt/cfg/hooks" = {
+    text = ''
+    # hook = execute a command before an operation
+    # hooks can match more than one? and why account-hook .
+    #    . No, they match only one.
+    #    . The dot is used to create a default when not match on other hooks.
+    #    . Is a nice ideia to use dot with unset in cases on when not match, like imap_user/pass.
+
+
+    ##### account-hook
+    # account-hook should only be used to set
+    # connection-related settings such as passwords or tunnel commands.
+    account-hook . 'unset imap_user; unset imap_pass'
+    account-hook imaps://josh.chubb@jpc.id.au@vmcp66.digitalpacific.com.au/ 'set imap_user = "josh.chubb@jpc.id.au"; set imap_pass = "`pass email/josh.chubb`"'
+    account-hook imaps://alpinetortoise@jpc.id.au@vmcp66.digitalpacific.com.au/ 'set imap_user = "alpinetortoise@jpc.id.au"; set imap_pass = "`pass email/alpinetortoise`"'
+
+
+    ##### folder-hook
+    folder-hook imaps://vmcp66.digitalpacific.com.au/ 'source ~/.mutt/cfg/coreimapfolders_josh.chubb; set from="josh.chubb@jpc.id.au"'
+    folder-hook imaps://vmcp66.digitalpacific.com.au/ 'source ~/.mutt/cfg/coreimapfolders_alpinetortoise; set from="alpinetortoise@jpc.id.au"'
+
+
+    ##### send-hook, executed after edit the message in editor
+    ##### send2-hook, executed every time that the message/headers is changed
+    # ~h message header
+    # ~s subject
+    # -C to/cc
+    # hostname is used only for Message-ID
+    send2-hook . 'unset smtp_url; unset imap_pass; unset hostname'
+    send2-hook ~h'josh.chubb@jpc.id.au' 'set smtp_url = "smtps://user@smtp.gmail.com"; set smtp_pass = "`pass email/josh.chubb`"; source ~/.mutt/cfg/coreimapfolders_josh.chubb; set hostname=jpc.id.au'
+    send2-hook ~h'alpinetortoise@jpc.id.au' 'set smtp_url = "smtps://alpinetortoise@jpc.id.au@vmcp66.digitalpacific.com.au"; set smtp_pass = "`pass email/alpinetortoise`"; source ~/.mutt/cfg/coreimapfolders_alpinetortoise; set hostname=jpc.id.au'
+
+
+    ##### address to use in from when reply
+    reply-hook . 'unset from'
+    reply-hook ~C'josh.chubb@jpc.id.au' my_hdr from: josh.chubb@jpc.id.au
+    reply-hook ~C'alpinetortoise@jpc.id.au' my_hdr from: alpinetortoise@jpc.id.au
+    # people and address to use
+    reply-hook ~h'peopleaddress1' my_hdr from: user@yourdomain.net
+    reply-hook ~h'peopleaddress2' my_hdr from: user@yourdomain.net
+    '';
+  };
+#+END_SRC
+*** cfg/gpg
+*** cfg/mailboxes
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/mailboxes
+  ".mutt/cfg/mailboxes" = {
+    text = ''
+    # mailboxes: folders that can receive mail and will be periodic checked.
+    # IMPORTANT: must be after set spoolfile and folder variables if you use !/=/+ in names.
+    # ! = your $spoolfile (incoming) mailbox
+    # = or + your $folder directory
+    # for more check '10. Mailbox Shortcuts' in manual.txt
+
+    source ~/.mutt/cfg/coreimapfolders_alpinetortoise
+    mailboxes -label INBOX_alpinetortoise !
+    mailboxes +Drafts
+    mailboxes +Sent
+    mailboxes +Trash
+
+    source ~/.mutt/cfg/coreimapfolders_josh.chubb
+    mailboxes -label INBOX_josh.chubb !
+    mailboxes +Drafts
+    mailboxes +Sent
+    mailboxes +Trash
+    '';
+  };
+#+END_SRC
+**** alpinetortoise
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/acct/at
+  ".mutt/cfg/coreimapfolders_alpinetortoise" = {
+    text = ''
+    # note: always keep the last /, because + and other shortcuts can use folder variable
+    set folder = "imaps://alpinetortoise@jpc.id.au@vmcp66.digitalpacific.com.au/"
+    set spoolfile = "+INBOX"
+    set trash = "+Trash"
+    set postponed = "+Drafts"
+    set record = "+Sent"
+    '';
+  };
+#+END_SRC
+**** josh.chubb
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/acct/jc
+  ".mutt/cfg/coreimapfolders_josh.chubb" = {
+    text = ''
+    # note: always keep the last /, because + and other shortcuts can use folder variable
+    set folder = "imaps://josh.chubb@jpc.id.au@vmcp66.digitalpacific.com.au/"
+    set spoolfile = "+INBOX"
+    set trash = "+Trash"
+    set postponed = "+Drafts"
+    set record = "+Sent"
+    '';
+  };
+#+END_SRC
+*** cfg/headers
+#+begin_src nix :tangle no :noweb-ref mutt/cfg/headers
+    ".mutt/cfg/headers" = {
+      text = ''
+      set edit_headers = yes
+
+      # ignore all
+      ignore *
+
+      # un-ignore these
+      unignore From:
+      unignore To:
+      unignore Reply-To:
+      unignore Mail-Followup-To:
+      unignore Subject:
+      unignore Date:
+      unignore Organization:
+      unignore Newsgroups:
+      unignore CC:
+      unignore BCC:
+      unignore Message-ID:
+      unignore X-Mailer:
+      unignore User-Agent:
+      unignore X-Junked-Because:
+      unignore X-SpamProbe:
+      unignore X-Virus-hagbard:
+      unignore Return-Receipt-To:
+      unignore Disposition-Notification-To:
+      unignore X-Disposition-Sent:
+      unignore X-Priority:
+      unignore X-URL:
+
+      hdr_order From: Subject: To: CC: BCC: Reply-To: Mail-Followup-To: Date: Organization: User-Agent: X-Mailer:
+      '';
+    };
+#+end_src
+*** cfg/sidebar
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/sidebar
+  ".mutt/cfg/sidebar" = {
+    text = ''
+         # Should the Sidebar be shown?
+        set sidebar_visible = yes
+
+        set sidebar_format = '%B%?F? [%F]?%* %?N?%N/?%S'
+        set sidebar_short_path = yes
+        '';
+  };
+#+END_SRC
+*** cfg/keybindings
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/keybindings
+  ".mutt/cfg/keybindings" = {
+    text = ''
+         ## some keys based on Emacs usage
+         # alt key = \e
+
+         bind index G imap-fetch-mail
+
+         bind index,pager \Cp previous-undeleted
+         bind index,pager \Cn next-undeleted
+         bind index,pager \ep previous-thread
+         bind index,pager \en next-thread
+         bind index,pager \ev previous-page
+         bind index,pager \Cv next-page
+
+         bind index,pager <Left> sidebar-toggle-visible
+         bind index,pager <Right> sidebar-open
+         bind index,pager <Up> sidebar-prev
+         bind index,pager <Down> sidebar-next
+         '';
+  };
+#+END_SRC
+*** cfg/macros
+#+BEGIN_SRC nix :tangle no :noweb-ref mutt/cfg/macros
+  ".mutt/cfg/macros" = {
+    text = ''
+         # from https://gitlab.com/muttmua/mutt/-/wikis/ConfigTricks
+         macro compose v "<edit-from>^Uidentity\_<tab>" "Select from"
+
+         #macro compose y "<ispell><send-message>" 'Spell and send message'
+         # set and run pt_BR spell
+         macro compose i '<enter-command>set ispell=$my_ptbr_spell<enter><ispell>'
+         # set and run en_US spell
+         macro compose I '<enter-command>set ispell=$my_enus_spell<enter><ispell>'
+
+         # based on https://github.com/redondos/mutt/blob/master/.mutt/sourced/macros
+         macro index ,r '<tag-pattern>.<enter><tag-prefix-cond><clear-flag>N\
+         <untag-pattern>.<enter><sidebar-next><sidebar-open>' "mark all read"
+
+         # save messages
+         macro index \Cs '<save-message>imaps://imap.gmail.com/saved_messages<enter>'
+
+         macro index d '<delete-message><previous-undeleted><next-new-then-unread>'
+         '';
+  };
+#+END_SRC
+** screen
+*** TODO Add in screen config
+** emacs.d
+*** TODO If I change my mind this looks promising
+#+BEGIN_EXAMPLE
+  ".emacs.d" = {
+     source = fetchFromGitHub {
+       owner = "syl20bnr";
+       repo = "spacemacs";
+       rev = "1f93c05";
+       sha256 = "1x0s5xlwhajgnlnb9mk0mnabhvhsf97xk05x79rdcxwmf041h3fd";
+     };
+     recursive = true;
+  };
+#+END_EXAMPLE
+Instantly I come across an issue, in that I won't be able to edit my emacs.conf, therefore I will be looking at having an init script for my home-manager.
+* Hyprland
+** Programs
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/progs
+  # Window manager dressings
+  rofi
+  waybar
+#+END_SRC
+*** TODO Add a notification daemon
+*** TODO Add hyprpaper
+*** Configs
+**** rofi.conf
+**** waybar.conf
+** Config
+#+BEGIN_SRC nix :tangle no :noweb yes :noweb-ref hypr/conf
+  wayland.windowManager.hyprland.enable = true;
+  wayland.windowManager.hyprland.settings = {
+    monitor=",preferred,auto,auto";
+    <<hypr/startup>>
+
+    <<hypr/input>>
+
+    <<hypr/pref>>
+
+    <<hypr/bind>>
+
+    <<hypr/look>>
+  };
+#+END_SRC
+*** Input
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/input
+  input = {
+    kb_layout = "us";
+    follow_mouse = "1";
+    touchpad = {
+      natural_scroll = "false";
+    };
+  };
+
+
+#+END_SRC
+*** Startup
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/startup
+  exec-once = [
+    "nm-applet &"
+    "waybar &"
+    "gpg-agent &"
+  ];
+#+END_SRC
+*** Preferred Programs
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/pref
+  "$vim" = "foot nvim";
+  "$mail" = "foot mutt";
+  "$terminal" = "foot";
+  "$fileManager" = "foot nnn";
+  "$menu" = "rofi -show drun";
+#+END_SRC
+*** Bindings
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/bind :noweb yes
+  "$mod" = "SUPER";
+  bind = [
+       "$mod, Space, exec, $menu"
+
+       "$mod, Q, exit,"
+       "$mod, L, exec, hyprlock"
+       <<hypr/bind/progs>>
+       <<hypr/win/mgmt>>
+       <<hypr/win/focus>>
+       <<hypr/scratch>>
+      ]
+      <<hypr/wrkspc/bind>>
+  <<hypr/bind/mouse>>
+#+END_SRC
+**** Programs
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/bind/progs
+  "$mod, E, exec, $vim"
+  "$mod SHIFT, E, exec, emacs"
+  "$mod, I, exec, $fileManager"
+  "$mod, M, exec, $mail"
+  "$mod, return, exec, $terminal"
+#+end_SRC
+**** Mouse
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/bind/mouse
+  bindm = [
+    "$mod, mouse:272, movewindow"
+    "$mod, mouse:273, resizewindow"
+   ];
+#+END_SRC
+*** Windows
+**** Management
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/win/mgmt
+  "$mod, C, killactive,"
+  "$mod, P, pseudo,"
+  "$mod, J, togglesplit,"
+  "$mod, V, togglefloating,"
+#+END_SRC
+**** Focus
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/win/focus
+  "$mod, left, movefocus, l"
+  "$mod, right, movefocus, r"
+  "$mod, up, movefocus, u"
+  "$mod, down, movefocus, d"
+#+END_SRC
+*** Scratch
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/scratch
+  "$mod, S, togglespecialworkspace, magic"
+  "$mod SHIFT, S, movetoworkspace, special:magic"
+#+END_SRC
+*** Workspace
+**** Bindings
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/wrkspc/bind
+  ++ (
+    builtins.concatLists (builtins.genList (i:
+      let ws = i + 1;
+      in [
+        "$mod, code:1${toString i}, workspace, ${toString ws}"
+        "$mod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
+      ]
+    )
+      9)
+  );
+#+END_SRC
+**** Layout
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/wrkspc/layout
+  dwindle = {
+    pseudotile = "true";
+    preserve_split = "true";
+  };
+
+  master = {
+    new_status = "master";
+  };
+
+  misc = {
+    force_default_wallpaper = "1";
+    disable_hyprland_logo = "true";
+  };
+#+END_SRC
+*** Look and Feel
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/look :noweb yes
+  <<hypr/look/decor>>
+  <<hypr/look/animation>>
+#+END_SRC
+**** TODO Add some zenburn colours in home.nix and use them here
+**** Decoration
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/look/decor
+  decoration = {
+    rounding = "10";
+
+    # Change transparency of focused and unfocused windows
+    active_opacity = "1.0";
+    inactive_opacity = "2.0";
+
+    shadow = {
+      enabled = "true";
+      range = "4";
+      render_power = "3";
+      color = "rgba(1a1a1aee)";
+    };
+
+    # https://wiki.hyprland.org/Configuring/Variables/#blur
+    blur = {
+      enabled = "true";
+      size = "3";
+      passes = "1";
+
+      vibrancy = "0.1696";
+    };
+  };
+#+END_SRC
+**** Animation
+#+BEGIN_SRC nix :tangle no :noweb-ref hypr/look/animation
+  animations = {
+    enabled = "yes, please :)";
+    bezier = [
+       "easeOutQuint,0.23,1,0.32,1"
+       "easeInOutCubic,0.65,0.05,0.36,1"
+       "linear,0,0,1,1"
+       "almostLinear,0.5,0.5,0.75,1.0"
+       "quick,0.15,0,0.1,1"
+    ];
+    animation = [
+       "global, 1, 10, default"
+       "border, 1, 5.39, easeOutQuint"
+       "windows, 1, 4.79, easeOutQuint"
+       "windowsIn, 1, 4.1, easeOutQuint, popin 87%"
+       "windowsOut, 1, 1.49, linear, popin 87%"
+       "fadeIn, 1, 1.73, almostLinear"
+       "fadeOut, 1, 1.46, almostLinear"
+       "fade, 1, 3.03, quick"
+       "layers, 1, 3.81, easeOutQuint"
+       "layersIn, 1, 4, easeOutQuint, fade"
+       "layersOut, 1, 1.5, linear, fade"
+       "fadeLayersIn, 1, 1.79, almostLinear"
+       "fadeLayersOut, 1, 1.39, almostLinear"
+       "workspaces, 1, 1.94, almostLinear, fade"
+       "workspacesIn, 1, 1.21, almostLinear, fade"
+       "workspacesOut, 1, 1.94, almostLinear, fade"
+    ];
+  };
+
+#+END_SRC
