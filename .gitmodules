@@ -1,0 +1,3 @@
+[submodule "Phonemacs"]
+	path = Phonemacs
+	url = git@github.com:alpinetortoise/phonemacs.git
